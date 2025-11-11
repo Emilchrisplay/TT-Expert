@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TT-Experten-App | Final</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tt-red: #D91E18; /* Tiefes Rot */
+            --tt-blue: #1C3373; /* Dunkles Blau */
+            --tt-green: #00A651;
+            --tt-dark: #1F2937;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; 
+            min-height: 100vh;
+        }
+        .card {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .tt-red-bg { background-color: var(--tt-red); }
+        .tt-red-text { color: var(--tt-red); }
+        .tt-blue-bg { background-color: var(--tt-blue); }
+        .tt-blue-text { color: var(--tt-blue); }
+        .tt-green-bg { background-color: var(--tt-green); }
+        .tt-green-text { color: var(--tt-green); }
+        
+        /* Visuelle Marken-Anzeige */
+        .brand-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .brand-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .brand-pill.butterfly { background-color: #1C3373; color: white; }
+        .brand-pill.joola { background-color: #FF9900; color: #1F2937; }
+        .brand-pill.donic { background-color: #D91E18; color: white; }
+        .brand-pill.tibhar { background-color: #065F46; color: white; }
+        .brand-pill.stiga { background-color: #4B5563; color: white; }
+        .brand-pill.victas { background-color: #8B5CF6; color: white; }
+        .brand-pill.andro { background-color: #2563EB; color: white; }
+        .brand-pill.xiom { background-color: #F87171; color: #1F2937; }
+        .brand-pill.nittaku { background-color: #FBBF24; color: #1F2937; }
+        .brand-pill.dhs { background-color: #991B1B; color: white; }
+        .brand-pill.gewo { background-color: #34D399; color: #1F2937; }
+
+
+        /* Quiz Specific Styles */
+        input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            border: 2px solid var(--tt-blue);
+            outline: none;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        input[type="radio"]:checked {
+            background-color: var(--tt-blue);
+            border: 5px solid white;
+            box-shadow: 0 0 0 2px var(--tt-blue);
+        }
+        .ranking-item {
+            position: relative;
+            padding-left: 3rem;
+        }
+        .ranking-number {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.125rem;
+        }
+        .ranking-1 { background-color: var(--tt-red); }
+        .ranking-2 { background-color: var(--tt-blue); }
+        .ranking-3 { background-color: var(--tt-green); }
+
+        /* Lade-Animation */
+        .dot-flashing {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--tt-blue);
+            color: var(--tt-blue);
+            animation: dotFlashing 1s infinite linear alternate;
+            animation-delay: 0.5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -15px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--tt-blue);
+            color: var(--tt-blue);
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 15px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--tt-blue);
+            color: var(--tt-blue);
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dotFlashing {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app-container" class="w-full max-w-lg bg-white rounded-xl card p-6 md:p-10">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-tt-dark">TT-Experten-App</h1>
+            <p id="app-status" class="text-gray-500 mt-2">Die ultimative App für Tischtennis-Material und Wissen.</p>
+            <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 mt-4 hidden">
+                <div id="progress" class="tt-red-bg h-2.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Section -->
+        <section id="dynamic-content-section">
+            <!-- Content will be injected here -->
+        </section>
+
+        <!-- Navigation Buttons (Hidden by default, shown for Quiz steps) -->
+        <div id="nav-buttons" class="mt-8 flex justify-between gap-4 hidden">
+            <button id="back-button" onclick="prevStep()" class="flex-1 bg-gray-300 text-gray-800 py-3 rounded-lg font-semibold transition hover:bg-gray-400 disabled:opacity-50">
+                Zurück
+            </button>
+            <button id="next-button" onclick="nextStep()" class="flex-1 tt-red-bg text-white py-3 rounded-lg font-semibold transition hover:opacity-80 disabled:opacity-50">
+                Starten
+            </button>
+        </div>
+        
+        <!-- Bottom Nav (Always shown except on Landing for a cleaner look) -->
+        <div id="bottom-nav" class="mt-8 pt-4 border-t border-gray-100 hidden">
+            <button onclick="goToPage('landing')" class="w-full text-center text-sm font-semibold text-gray-500 hover:text-tt-blue transition">
+                <span class="inline-block text-xl align-middle mr-1">🏠</span> Zurück zur Hauptseite
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // === DATENBANK (MOCK DATA) ===
+        // Produkte mit echten Markennamen und detaillierten Attributen
+        const MOCK_BLADES = [
+            { id: 1, name: "Allround Classic", brand: "STIGA", style: "All+", desc: "Der absolute Klassiker. Perfekt für Anfänger und Allround-Spieler.", speed: 4, control: 10, stiffness: 4, material: "Holz" },
+            { id: 2, name: "Timo Boll ALC", brand: "BUTTERFLY", style: "Off-/Allround", desc: "Ein vielseitiges ALC Holz mit exzellentem Gefühl.", speed: 7, control: 8, stiffness: 7, material: "Carbon" },
+            { id: 3, name: "Baum Esprit", brand: "DONIC", style: "Off+", desc: "Ein schnelles, steifes Carbon-Holz für aggressive Angreifer.", speed: 9, control: 6, stiffness: 9, material: "Carbon" },
+            { id: 4, name: "Koji Matsushita", brand: "VICTAS", style: "Def", desc: "Speziell für klassisch defensive Spieler entwickelt.", speed: 3, control: 9, stiffness: 5, material: "Holz" },
+            { id: 5, name: "Stratus Powerwood", brand: "TIBHAR", style: "Off", desc: "Ein reines Holz-Offensiv-Holz. Ausgewogen zwischen Tempo und Gefühl.", speed: 6, control: 7, stiffness: 6, material: "Holz" },
+            { id: 6, name: "Treiber K", brand: "ANDRO", style: "Off-", desc: "Gut kontrollierbares Offensivholz, ideal für Rotation und präzise Platzierung.", speed: 6, control: 9, stiffness: 5, material: "Holz" },
+            { id: 7, name: "Nobilis", brand: "JOOLA", style: "Off+", desc: "Extrem schnelles Composite-Holz (PBO-c) für maximale Durchschlagskraft.", speed: 10, control: 5, stiffness: 10, material: "Carbon" },
+            { id: 8, name: "Alligator Combi", brand: "DONIC", style: "Def/All", desc: "Kombiholz, auf einer Seite langsam (Def) und auf der anderen Seite schnell (All).", speed: 4, control: 9, stiffness: 6, material: "Holz" },
+            { id: 9, name: "Feel AX", brand: "XIOM", style: "All+", desc: "Ein 5-Schicht-Holz mit sehr guter Balance, gut für Spin und Kontrolle.", speed: 5, control: 9, stiffness: 5, material: "Holz" },
+            { id: 10, name: "Acoustic Carbon", brand: "NITTAKU", style: "Off-", desc: "Premium-Hybrid mit viel Gefühl und tollem Sound, für spinorientierte Allrounder.", speed: 7, control: 8, stiffness: 6, material: "Carbon" },
+        ];
+        const MOCK_RUBBERS = [
+            { id: 101, name: "Bluefire M1", brand: "DONIC", style: "Offensiv (Tension)", desc: "Ein harter, schneller Belag mit hohem Katapult.", speed: 9, control: 6, spin: 9, hardness: 8, rubber_type: "Offensiv" },
+            { id: 102, name: "Sriver", brand: "BUTTERFLY", style: "Allround (Klassisch)", desc: "Der Alleskönner. Mittlere Geschwindigkeit und Kontrolle.", speed: 6, control: 8, spin: 7, hardness: 6, rubber_type: "Allround" },
+            { id: 103, name: "Vega Europe", brand: "XIOM", style: "Allround (Soft)", desc: "Weicher Belag mit hoher Fehlertoleranz. Gut für Spin-Eröffnung.", speed: 7, control: 9, spin: 8, hardness: 5, rubber_type: "Allround" },
+            { id: 104, name: "Grass D.TecS", brand: "TIBHAR", style: "Defensiv (Lange Noppen)", desc: "Lange Noppen für maximale Störeffekte beim Abwehren und Blocken.", speed: 2, control: 10, spin: 1, hardness: 10, rubber_type: "Noppe" },
+            { id: 105, name: "Hurricane 3 Neo", brand: "DHS", style: "Offensiv (Klebrig/Spin)", desc: "Klebrige Oberfläche. Sehr spinfreudig und gut für Vorhand-Power.", speed: 8, control: 7, spin: 10, hardness: 9, rubber_type: "Offensiv" },
+            { id: 106, name: "Rhyzer 48", brand: "JOOLA", style: "Offensiv (Tension)", desc: "Moderner, dynamischer Belag mit mittlerer Härte.", speed: 8, control: 7, spin: 8, hardness: 7, rubber_type: "Offensiv" },
+            { id: 107, name: "Spectol", brand: "VICTAS", style: "Offensiv (Kurze Noppen)", desc: "Kurze Noppen für flaches Abspringen und hohe Geschwindigkeit.", speed: 7, control: 9, spin: 4, hardness: 6, rubber_type: "Noppe" },
+            { id: 108, name: "Backside 2.0", brand: "ANDRO", style: "Defensiv (Anti-Top)", desc: "Anti-Topspin Belag. Neutralisiert den gegnerischen Spin maximal.", speed: 1, control: 10, spin: 1, hardness: 5, rubber_type: "Anti" },
+            { id: 109, name: "Tenergy 05", brand: "BUTTERFLY", style: "Offensiv (High-End)", desc: "Der Referenzbelag: Maximale Rotation und Bogen, sehr dynamisch.", speed: 9, control: 6, spin: 10, hardness: 8, rubber_type: "Offensiv" },
+            { id: 110, name: "Neoflexx eSP", brand: "GEWO", style: "Allround (Soft/Tempo)", desc: "Sehr weicher Belag, der viel Gefühl und hohen Katapult bietet.", speed: 6, control: 9, spin: 7, hardness: 4, rubber_type: "Allround" },
+        ];
+        const RULES = [
+            { title: "Gültiger Aufschlag (Service)", detail: "Der Ball muss offen auf der flachen Hand liegen, senkrecht mindestens 16 cm hochgeworfen werden, und darf erst auf dem Weg nach unten geschlagen werden. Er muss zuerst auf der eigenen, dann auf der gegnerischen Hälfte auftreffen." },
+            { title: "Kantenball (Edge Ball)", detail: "Trifft der Ball die obere Kante der Tischplatte, ist dies ein gültiger Ball (Punkt). Trifft der Ball die Seitenkante unterhalb der Oberfläche, ist dies kein gültiger Ball (Fehler)." },
+            { title: "Netzaufschlag (Let)", detail: "Berührt der Ball beim Aufschlag das Netz oder seine Stützen, und ist der Aufschlag ansonsten gültig (Ball landet auf der richtigen Seite), muss der Aufschlag wiederholt werden (Let)." },
+            { title: "Doppelberührung", detail: "Der Ball darf nur einmal pro Schlag mit dem Schläger berührt werden. Eine versehentliche Doppelberührung in einer einzigen Schlagbewegung zählt als gültiger Schlag." },
+            { title: "Was ist ein 'Anhalten'?", detail: "Den Schläger bei einem Block oder Schupf absichtlich so zu bewegen, dass der Ball an der Oberfläche 'hängen' bleibt. Dies ist meistens ein illegaler Bewegungsablauf und führt zum Punktverlust." }
+        ];
+        const QUESTIONS = [
+            { text: "1. Welchen Spielstil verfolgst du hauptsächlich?", attribute: 'style_preference', options: [ { label: "Ich spiele meistens offensiv, Angriff Topspin aus jeder Lage.", value: { speed: 3, control: -1, stiffness: 1, spin: 2 } }, { label: "Ich spiele Allround, sowohl Angriff als auch kontrollierte Abwehr.", value: { speed: 1, control: 1, stiffness: 0, spin: 1 } }, { label: "Ich spiele defensiv, viel Unterschnitt, Abwehr und Blocken.", value: { speed: -3, control: 3, stiffness: -1, spin: -2 } }, { label: "Ich bin ein Materialspieler (Noppen/Anti) und suche Störeffekte.", value: { speed: -1, control: 2, stiffness: 0, spin: -3, hardness: 2 } }, ] },
+            { text: "2. Was ist dir am wichtigsten bei deinem Material-Setup?", attribute: 'priority', options: [ { label: "Maximale Geschwindigkeit und Power (hoher Speed-Score).", value: { speed: 3, control: -2, stiffness: 2, hardness: 1 } }, { label: "Perfekte Kontrolle und Fehlerverzeihung (hoher Control-Score).", value: { speed: -3, control: 3, stiffness: -2, hardness: -2 } }, { label: "Hoher Spin und Effet (Rotationsstärke und Bogen).", value: { speed: 1, control: 0, stiffness: 0, spin: 3, hardness: 1 } }, ] },
+            { text: "3. Wie oft stehst du beim Spiel an der Platte?", attribute: 'distance', options: [ { label: "Nah am Tisch (Blocken, Kontern, schnelles Spiel).", value: { speed: 0, control: 2, stiffness: 1, hardness: 0 } }, { label: "Halbdistanz (Topspin aus mittlerer Entfernung).", value: { speed: 2, control: 0, stiffness: 0, hardness: 1 } }, { label: "Aus der Ferne (Abwehr oder Topspin-Rallyes aus der Distanz).", value: { speed: 0, control: -2, stiffness: -2, hardness: -1 } }, ] },
+            { text: "4. Wie hart oder weich bevorzugst du den Belag-Kontakt?", attribute: 'feeling', options: [ { label: "Eher hart (direkter Sound, viel Energie-Übertragung).", value: { hardness: 3, control: -1, spin: 1 } }, { label: "Eher weich (längere Ballkontaktzeit, mehr Gefühl und Sicherheit).", value: { hardness: -3, control: 2, spin: 0 } }, ] },
+            { text: "5. Wie schätzt du deine aktuelle Spielstärke ein?", attribute: 'level', options: [ { label: "Anfänger / Wiedereinsteiger (brauche hohe Kontrolle).", value: { speed: -3, control: 3, stiffness: -2 } }, { label: "Fortgeschritten (gute Technik, suche Ausgewogenheit).", value: { speed: 0, control: 0, stiffness: 0 } }, { label: "Experte / Leistungsorientiert (brauche Power und Tempo).", value: { speed: 3, control: -3, stiffness: 2 } }, ] },
+            { text: "6. Was ist deine primäre Angriffswaffe?", attribute: 'attack_focus', options: [ { label: "Spin-orientierter Topspin (viel Rotation).", value: { spin: 2, speed: 0, control: 1, hardness: 1 } }, { label: "Tempo-orientierter Endschlag / Schuss.", value: { speed: 2, spin: 0, control: -1, stiffness: 2 } }, { label: "Blocken und Kontern nah am Tisch.", value: { speed: -1, spin: 0, control: 2, stiffness: 0 } }, ] },
+            { text: "7. Bevorzugst du Carbon-Hölzer oder reine Holz-Hölzer?", attribute: 'blade_material', options: [ { label: "Carbon oder andere Composite-Materialien (steifer, schneller).", value: { stiffness: 2, speed: 1, control: -1 } }, { label: "Reines Holz (mehr Gefühl, weicherer Anschlag).", value: { stiffness: -2, speed: -1, control: 1 } }, ] },
+            { text: "8. Welchen Belagstyp nutzt du am ehesten?", attribute: 'rubber_type_pref', options: [ { label: "Klassischer Noppen-Innen-Belag (Tension, Soft oder Hart).", value: { spin: 1, hardness: 0 } }, { label: "Chinesische (klebrige) Beläge (extrem viel Spin).", value: { spin: 2, hardness: 1, speed: 1 } }, { label: "Noppen (Kurz/Lang/Anti) oder andere Spezialbeläge.", value: { spin: -3, control: 3, speed: -1 } }, ] },
+        ];
+        const TOTAL_QUESTIONS = QUESTIONS.length; 
+
+        const MOCK_OFFERS = [
+            { title: "JOOLA Rhyzer Power-Bundle", desc: "Top-Holz für den aggressiven Angreifer. Maximale Durchschlagskraft.", price: 129.95, oldPrice: 179.95, category: "Holz", color: 'tt-red', brand: 'JOOLA' },
+            { title: "BUTTERFLY Tenergy Set", desc: "Zwei Tenergy Beläge (rot/schwarz) mit hohem Spin-Potenzial für die Halbdistanz.", price: 159.99, oldPrice: 189.99, category: "Beläge", color: 'tt-blue', brand: 'BUTTERFLY' },
+            { title: "DONIC Trainingsbälle (100er Pack)", desc: "1-Stern Trainingsbälle für das Robotertraining und Aufschlagübungen.", price: 29.99, oldPrice: 39.99, category: "Zubehör", color: 'tt-green', brand: 'DONIC' },
+        ];
+
+
+        // === ZUSTAND (STATE) ===
+        let currentPage = 'landing'; 
+        let currentQuestionIndex = -1; 
+        let userProfile = {};
+        let userAnswers = [];
+        let currentBladeInput = '';
+        let currentRubberInput = '';
+
+        // Gemini Zustand
+        let aiResult = '';
+        let aiSources = [];
+        let aiLoading = false;
+
+        // === API LOGIK MIT BACKOFF ===
+
+        const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+        const apiKey = ""; // Wird in der Canvas-Umgebung automatisch bereitgestellt
+        
+        // Allgemeine Retry-Logik für API-Anfragen (Exponential Backoff)
+        async function fetchWithRetry(apiUrl, payload, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.status === 429 && i < retries - 1) {
+                        // Rate Limit, Backoff
+                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                        continue;
+                    }
+                    if (!response.ok) {
+                         throw new Error(`API returned status ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    // Anderer Fehler, Backoff
+                    await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        async function fetchRuleInterpretation() {
+            const queryInput = document.getElementById('rule-query');
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            // Ladezustand setzen und UI aktualisieren
+            aiLoading = true;
+            aiResult = 'Lade...';
+            aiSources = [];
+            renderRulesPage(document.getElementById('dynamic-content-section'));
+            
+            const systemPrompt = "Du bist ein erfahrener, freundlicher und präziser Tischtennis-Schiedsrichter (Referee). Antworte in klarem, freundlichem Deutsch auf die Frage zur Regelinterpretation oder Spielsituation. Wenn du eine Regel zitieren kannst, mache dies kurz. Beginne deine Antwort immer damit, ob die Situation 'Punkt' oder 'Fehler' ist und warum. Beziehe dich auf die offiziellen ITTF-Regeln.";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${gemini-2.5-flash-preview-09-2025}:generateContent?key=${AIzaSyAFQGuB-lb3aKxXeGkDuEdvXgWZ-fQO2G8}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: query }] }],
+                // Google Search Grounding für aktuelle Regeln
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, payload);
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    aiResult = candidate.content.parts[0].text;
+                    
+                    // Quellen extrahieren
+                    const groundingMetadata = candidate.groundingMetadata;
+                    let sources = [];
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title)
+                            // Nur die ersten 3 Quellen anzeigen
+                            .slice(0, 3);
+                    }
+                    aiSources = sources;
+                } else {
+                    aiResult = 'Entschuldigung, ich konnte keine Antwort finden. Versuchen Sie es bitte anders zu formulieren.';
+                    aiSources = [];
+                }
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                aiResult = 'Ein Fehler bei der Kommunikation mit dem Experten ist aufgetreten. Bitte versuche es später erneut.';
+                aiSources = [];
+            } finally {
+                aiLoading = false;
+                renderRulesPage(document.getElementById('dynamic-content-section'));
+                queryInput.value = ''; // Eingabefeld nach Absenden leeren
+            }
+        }
+
+
+        // === HAUPTFUNKTIONEN UND NAVIGATION ===
+
+        function initializeApp() {
+            // Zustand zurücksetzen
+            currentQuestionIndex = -1;
+            userProfile = { speed: 0, control: 0, spin: 0, hardness: 0, stiffness: 0 };
+            userAnswers = Array(TOTAL_QUESTIONS).fill(null);
+            currentBladeInput = '';
+            currentRubberInput = '';
+            aiResult = '';
+            aiSources = [];
+            aiLoading = false;
+            
+            goToPage('landing'); 
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+
+            const navButtons = document.getElementById('nav-buttons');
+            const bottomNav = document.getElementById('bottom-nav');
+            const progressBar = document.getElementById('progress-bar');
+            
+            navButtons.classList.add('hidden');
+            bottomNav.classList.remove('hidden');
+            progressBar.classList.remove('hidden');
+
+            if (page === 'landing') {
+                bottomNav.classList.add('hidden');
+                progressBar.classList.add('hidden');
+            } else if (page === 'consultant' && currentQuestionIndex >= -1 && currentQuestionIndex < TOTAL_QUESTIONS) {
+                navButtons.classList.remove('hidden');
+            } else {
+                 // Sorge dafür, dass die Nav-Buttons auf der Result-Seite verschwinden
+                 if(page === 'consultant' && currentQuestionIndex === TOTAL_QUESTIONS) {
+                     navButtons.classList.add('hidden');
+                 }
+            }
+            
+            renderApp();
+        }
+
+        /**
+         * Zentrale Rendering-Funktion, die basierend auf currentPage die korrekte Ansicht lädt.
+         */
+        function renderApp() {
+            const container = document.getElementById('dynamic-content-section');
+            container.innerHTML = '';
+            
+            if (currentPage === 'landing') {
+                renderLandingPage(container);
+            } else if (currentPage === 'consultant') {
+                if (currentQuestionIndex === -1) {
+                    renderInitialInput(container);
+                } else if (currentQuestionIndex >= 0 && currentQuestionIndex < TOTAL_QUESTIONS) {
+                    renderQuizQuestion(container);
+                }
+            } else if (currentPage === 'rules') {
+                renderRulesPage(container);
+            } else if (currentPage === 'offers') {
+                renderOffersPage(container);
+            }
+
+            updateNavigationButtons();
+            updateProgressBar();
+        }
+
+        // === RENDERING FÜR SEITEN-MODI ===
+
+        function getBrandClass(brand) {
+            switch(brand) {
+                case 'BUTTERFLY': return 'butterfly';
+                case 'JOOLA': return 'joola';
+                case 'DONIC': return 'donic';
+                case 'TIBHAR': return 'tibhar';
+                case 'STIGA': return 'stiga';
+                case 'VICTAS': return 'victas';
+                case 'ANDRO': return 'andro';
+                case 'XIOM': return 'xiom';
+                case 'NITTAKU': return 'nittaku';
+                case 'DHS': return 'dhs';
+                case 'GEWO': return 'gewo';
+                default: return 'bg-gray-500 text-white';
+            }
+        }
+        
+        function getBrandIcon(brand) {
+            switch(brand) {
+                case 'BUTTERFLY': return '🦋';
+                case 'JOOLA': return '🔥';
+                case 'DONIC': return '🔴';
+                case 'TIBHAR': return '🌲';
+                case 'STIGA': return '⭐';
+                case 'VICTAS': return '🛡️';
+                case 'ANDRO': return '⚡';
+                case 'XIOM': return '🌀';
+                case 'NITTAKU': return '🏆';
+                case 'DHS': return '🇨🇳'; // China-Assoziation
+                case 'GEWO': return '💨';
+                default: return '🏓';
+            }
+        }
+
+        function renderLandingPage(container) {
+            document.getElementById('app-status').textContent = 'Deine digitale TT-Zentrale';
+            
+            const uniqueBrands = ['BUTTERFLY', 'JOOLA', 'DONIC', 'TIBHAR', 'STIGA', 'VICTAS', 'ANDRO', 'XIOM'];
+            let brandsHtml = '';
+            uniqueBrands.forEach(brand => {
+                const brandClass = getBrandClass(brand);
+                const icon = getBrandIcon(brand);
+                brandsHtml += `<span class="brand-pill ${brandClass}">${icon} ${brand}</span>`;
+            });
+            
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="p-4 bg-gray-100 rounded-xl mb-6 shadow-inner border border-gray-200">
+                        <h2 class="text-xl font-bold text-tt-dark mb-3">Top Tischtennis Marken (Echte Namen)</h2>
+                        <div class="flex justify-center items-center flex-wrap">
+                            ${brandsHtml}
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">Hinweis: Die Namen sind echt. Die Icons und Farben sind symbolisch.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-tt-dark mb-6">Wähle eine Funktion:</h2>
+                    
+                    <div class="space-y-4">
+                        <button onclick="goToPage('consultant')" class="w-full text-left p-4 rounded-xl bg-white border-2 border-tt-red transition hover:bg-red-50 flex items-center shadow-md">
+                            <span class="text-3xl mr-4 tt-red-text">🔥</span>
+                            <div>
+                                <h3 class="font-bold text-lg tt-red-text">Material Berater V3</h3>
+                                <p class="text-sm text-gray-600">Finde das perfekte Holz und die passenden Beläge für deinen Spielstil.</p>
+                            </div>
+                        </button>
+                        
+                        <button onclick="goToPage('offers')" class="w-full text-left p-4 rounded-xl bg-white border-2 border-tt-green transition hover:bg-green-50 flex items-center shadow-md">
+                            <span class="text-3xl mr-4 tt-green-text">💰</span>
+                            <div>
+                                <h3 class="font-bold text-lg tt-green-text">TT-Angebote & Deals (Shop)</h3>
+                                <p class="text-sm text-gray-600">Sieh dir die aktuellen Top-Angebote an (simulierter Shop).</p>
+                            </div>
+                        </button>
+
+                        <button onclick="goToPage('rules')" class="w-full text-left p-4 rounded-xl bg-white border-2 border-tt-blue transition hover:bg-blue-50 flex items-center shadow-md">
+                            <span class="text-3xl mr-4 tt-blue-text">⚖️</span>
+                            <div>
+                                <h3 class="font-bold text-lg tt-blue-text">TT-Regel-Check</h3>
+                                <p class="text-sm text-gray-600">Schnelles Nachschlagen der kniffligsten Regeln und Situationen.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOffersPage(container) {
+            document.getElementById('app-status').textContent = 'Aktuelle Deals (Simuliert)';
+            
+            let offersHtml = '';
+            MOCK_OFFERS.forEach(offer => {
+                offersHtml += `
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 transform hover:scale-[1.01] transition duration-200">
+                        <span class="inline-block text-xs font-bold px-2 py-0.5 rounded-full text-white bg-tt-red mb-2">🔥 TOP DEAL - ${offer.brand}</span>
+                        <h4 class="text-xl font-bold text-tt-dark">${offer.title}</h4>
+                        <p class="text-sm text-gray-600 mb-3">${offer.desc}</p>
+                        
+                        <div class="flex items-center justify-between mt-3">
+                            <div class="text-left">
+                                <span class="text-lg font-extrabold text-${offer.color}-text">${offer.price.toFixed(2).replace('.', ',')}€</span>
+                                <span class="text-xs text-gray-400 line-through ml-2">${offer.oldPrice.toFixed(2).replace('.', ',')}€</span>
+                            </div>
+                            <button class="bg-tt-green text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-tt-green/80 transition shadow-md">
+                                In den Warenkorb
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="text-left">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">Exklusive Tischtennis-Angebote</h2>
+                    <p class="text-sm text-gray-600 mb-6 italic bg-yellow-50 p-3 rounded-lg border border-yellow-300">
+                        ⚠️ **Hinweis:** Dies ist ein simulierter Shop. Die Preise und Produkte sind Mock-Daten.
+                    </p>
+                    <div class="space-y-6">
+                        ${offersHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function renderRulesPage(container) {
+            document.getElementById('app-status').textContent = 'TT-Regel-Check: Häufige Fragen & KI-Experte';
+            
+            let rulesHtml = '';
+            RULES.forEach((rule, index) => {
+                rulesHtml += `
+                    <div class="border-b border-gray-200 py-3">
+                        <button class="w-full flex justify-between items-center text-lg font-semibold tt-blue-text hover:text-tt-dark transition"
+                                onclick="toggleDetails('rule-detail-${index}')">
+                            ${rule.title}
+                            <span id="rule-toggle-${index}" class="text-xl font-extrabold">+</span>
+                        </button>
+                        <p id="rule-detail-${index}" class="text-gray-700 mt-2 text-sm hidden p-3 border-l-4 border-tt-blue/50 bg-blue-50 rounded-r-lg">
+                            ${rule.detail}
+                        </p>
+                    </div>
+                `;
+            });
+
+            // LLM Section
+            let aiResultHtml = '';
+            if (aiLoading) {
+                aiResultHtml = `
+                    <div class="flex items-center justify-center p-6 mt-4 bg-gray-50 rounded-lg">
+                        <div class="dot-flashing mr-4"></div>
+                        <p class="text-lg text-tt-blue font-semibold">Schiedsrichter denkt nach...</p>
+                    </div>
+                `;
+            } else if (aiResult) {
+                 const sourcesHtml = aiSources.map(s => 
+                     `<a href="${s.uri}" target="_blank" class="text-xs text-gray-500 hover:text-tt-blue underline block truncate" title="${s.title}">${s.title}</a>`
+                 ).join('');
+
+                aiResultHtml = `
+                    <div class="p-4 bg-white border border-tt-green/50 rounded-lg shadow-md mt-4 text-left">
+                        <p class="text-sm text-gray-800 whitespace-pre-wrap">${aiResult}</p>
+                        ${aiSources.length > 0 ? `
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <p class="text-xs font-semibold text-gray-600 mb-1">Quellen (Google Search):</p>
+                                ${sourcesHtml}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+
+            container.innerHTML = `
+                <div class="text-left">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Die kniffligsten Tischtennis-Regeln</h2>
+                    <p class="text-sm text-gray-600 mb-6">Tippe auf eine Regel, um die Erklärung zu sehen.</p>
+                    <div class="space-y-2 mb-8">
+                        ${rulesHtml}
+                    </div>
+
+                    <!-- Gemini LLM Feature -->
+                    <div class="border-t-4 border-tt-blue/50 pt-6 mt-6">
+                        <h3 class="text-xl font-extrabold tt-blue-text mb-4 flex items-center">
+                            ✨ Frage den Schiedsrichter-Experten
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Beschreiben Sie eine spezifische, unklare Spielsituation, um eine sofortige Regelinterpretation von unserem KI-Schiedsrichter zu erhalten.
+                        </p>
+                        
+                        <div class="flex flex-col gap-3">
+                            <textarea id="rule-query" rows="3" placeholder="Z.B.: Ist es ein Punkt, wenn der Ball beim Aufschlag das Netz berührt und ins Aus geht?"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-tt-blue focus:border-tt-blue transition shadow-sm resize-none"></textarea>
+                            <button onclick="fetchRuleInterpretation()" ${aiLoading ? 'disabled' : ''}
+                                class="bg-tt-blue text-white py-3 rounded-lg font-semibold transition hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md">
+                                ${aiLoading ? 'Experte wird befragt...' : 'Antwort erhalten'}
+                            </button>
+                        </div>
+                        
+                        <div id="ai-result-container">
+                            ${aiResultHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Hilfsfunktion für die Regel-Seite
+        function toggleDetails(id) {
+            const element = document.getElementById(id);
+            const toggleIcon = document.getElementById(id.replace('detail', 'toggle'));
+            
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+                toggleIcon.textContent = '–';
+            } else {
+                element.classList.add('hidden');
+                toggleIcon.textContent = '+';
+            }
+        }
+
+        // === MATERIAL-BERATER LOGIK (CONSULTANT) ===
+
+        function renderInitialInput(container) {
+            document.getElementById('app-status').textContent = 'Material-Berater V3 | Schritt 1: Dein Setup (Optional)';
+            container.innerHTML = `
+                <div class="text-center p-6 rounded-xl bg-blue-50 border border-tt-blue/50 mb-6">
+                    <h2 class="text-xl font-bold tt-blue-text mb-2">Dein aktuelles Material (Optional)</h2>
+                    <p class="text-gray-600 mb-4 text-sm">Für einen besseren Vergleich: Trage dein jetziges Holz und deinen Belag ein.</p>
+                    
+                    <div class="space-y-4">
+                        <input type="text" id="input-blade" placeholder="Aktuelles Holz (z.B. Viscaria)" value="${currentBladeInput}"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-tt-blue focus:border-tt-blue transition shadow-sm" />
+                        <input type="text" id="input-rubber" placeholder="Aktueller Belag (z.B. Tenergy 05)" value="${currentRubberInput}"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-tt-blue focus:border-tt-blue transition shadow-sm" />
+                    </div>
+                </div>
+            `;
+            updateNavigationButtons();
+        }
+
+        function renderQuizQuestion(container) {
+            const index = currentQuestionIndex;
+            const question = QUESTIONS[index];
+            
+            document.getElementById('app-status').textContent = `Material-Berater V3 | Frage ${index + 1} von ${TOTAL_QUESTIONS}`;
+
+            container.innerHTML = `
+                <div id="quiz-content">
+                    <p id="question-text" class="text-xl font-bold text-gray-700 mb-6">${question.text}</p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options go here -->
+                    </div>
+                </div>
+            `;
+            const optionsContainer = document.getElementById('options-container');
+
+            question.options.forEach((option, optionIndex) => {
+                const isChecked = userAnswers[index] === optionIndex;
+
+                const optionHtml = `
+                    <label class="flex items-center p-4 rounded-lg cursor-pointer transition duration-200 ease-in-out border ${isChecked ? 'border-tt-blue bg-blue-50 shadow-md' : 'border-gray-200 hover:bg-gray-50'}">
+                        <input type="radio" 
+                                name="question-${index}" 
+                                value="${optionIndex}" 
+                                onclick="handleAnswer(${index}, ${optionIndex})"
+                                ${isChecked ? 'checked' : ''}
+                                class="mr-4 flex-shrink-0">
+                        <span class="text-base text-gray-700">${option.label}</span>
+                    </label>
+                `;
+                optionsContainer.innerHTML += optionHtml;
+            });
+            updateNavigationButtons();
+        }
+
+        function displayResults(blades, rubbers) {
+            currentQuestionIndex = TOTAL_QUESTIONS; 
+            document.getElementById('nav-buttons').classList.add('hidden');
+            document.getElementById('app-status').textContent = 'Deine Top 3 Empfehlungen';
+
+            const container = document.getElementById('dynamic-content-section');
+            
+            let currentGearHtml = '';
+            if (currentBladeInput || currentRubberInput) {
+                currentGearHtml = `
+                    <div class="p-4 bg-yellow-100 rounded-lg text-left border border-yellow-400 mb-6 shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-1">Dein aktuelles Material:</h3>
+                        <p class="text-sm text-gray-700">Holz: <span class="font-semibold">${currentBladeInput || 'Nicht angegeben'}</span></p>
+                        <p class="text-sm text-gray-700">Belag: <span class="font-semibold">${currentRubberInput || 'Nicht angegeben'}</span></p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div id="results-section" class="text-center">
+                    <h2 class="text-3xl font-bold tt-red-text mb-6">Dein Perfektes Setup</h2>
+                    
+                    ${currentGearHtml}
+
+                    <div class="space-y-8">
+                        
+                        <!-- Blade Recommendations -->
+                        <div class="p-5 bg-gray-100 rounded-xl text-left border-4 border-tt-red/50 shadow-lg">
+                            <h3 class="text-2xl font-extrabold tt-red-text mb-4">Holz (Blade) Vorschläge</h3>
+                            ${createRecommendationList(blades, 'blade')}
+                        </div>
+
+                        <!-- Rubber Recommendations -->
+                        <div class="p-5 bg-gray-100 rounded-xl text-left border-4 border-tt-blue/50 shadow-lg">
+                            <h3 class="text-2xl font-extrabold tt-blue-text mb-4">Belag (Rubber) Vorschläge</h3>
+                            ${createRecommendationList(rubbers, 'rubber')}
+                        </div>
+
+                        <!-- Disclaimer -->
+                        <div class="text-xs text-gray-500 mt-6 pt-4 border-t">
+                            <p>Die Materialien sind **simulierte Beispiele**. Besuche den <a href="#" onclick="goToPage('offers')" class="underline tt-green-text font-semibold">TT-Shop</a> für Mock-Angebote.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('progress').style.width = '100%';
+        }
+
+
+        // === NAVIGATION UND STATE-FUNKTIONEN ===
+
+        function updateNavigationButtons() {
+            const backBtn = document.getElementById('back-button');
+            const nextBtn = document.getElementById('next-button');
+
+            if (currentPage !== 'consultant') {
+                document.getElementById('nav-buttons').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('nav-buttons').classList.remove('hidden');
+
+            if (currentQuestionIndex === -1) {
+                // Initial Input Screen
+                backBtn.disabled = true;
+                nextBtn.textContent = 'Zum Quiz starten';
+                nextBtn.disabled = false;
+            } else if (currentQuestionIndex >= 0 && currentQuestionIndex < TOTAL_QUESTIONS) {
+                // Quiz Question Screen
+                backBtn.disabled = false;
+                if (currentQuestionIndex === TOTAL_QUESTIONS - 1) {
+                    nextBtn.textContent = 'Ergebnis anzeigen';
+                } else {
+                    nextBtn.textContent = 'Weiter';
+                }
+                // Weiter-Button nur aktivieren, wenn eine Antwort ausgewählt wurde
+                nextBtn.disabled = userAnswers[currentQuestionIndex] === null; 
+            } else {
+                // Results screen
+                document.getElementById('nav-buttons').classList.add('hidden');
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = document.getElementById('progress');
+            let percentage = 0;
+            
+            if (currentPage === 'consultant') {
+                const totalSteps = TOTAL_QUESTIONS + 1; // Initial Input + N Questions
+                if (currentQuestionIndex === -1) {
+                    percentage = 1; // Minimaler Fortschritt nach Klick auf Consultant
+                } else if (currentQuestionIndex >= 0 && currentQuestionIndex < TOTAL_QUESTIONS) {
+                    // Quiz-Schritte (1 bis TOTAL_QUESTIONS)
+                    percentage = ((currentQuestionIndex + 1) / totalSteps) * 100;
+                } else if (currentQuestionIndex === TOTAL_QUESTIONS) {
+                    percentage = 100;
+                }
+            } else {
+                percentage = 0; 
+            }
+            progress.style.width = `${percentage}%`;
+        }
+
+        function handleAnswer(qIndex, oIndex) {
+            userAnswers[qIndex] = oIndex;
+            updateNavigationButtons(); 
+        }
+
+        function nextStep() {
+            if (currentPage !== 'consultant') return;
+
+            if (currentQuestionIndex === -1) {
+                // Speichern der optionalen Eingaben vor dem Start des Quiz
+                const inputBlade = document.getElementById('input-blade');
+                const inputRubber = document.getElementById('input-rubber');
+                if (inputBlade && inputRubber) {
+                    currentBladeInput = inputBlade.value.trim();
+                    currentRubberInput = inputRubber.value.trim();
+                }
+                currentQuestionIndex = 0;
+                renderApp();
+            } 
+            else if (currentQuestionIndex >= 0 && currentQuestionIndex < TOTAL_QUESTIONS) {
+                if (userAnswers[currentQuestionIndex] === null) {
+                    console.error("Bitte wähle eine Option, bevor du fortfährst.");
+                    return; 
+                }
+                
+                if (currentQuestionIndex === TOTAL_QUESTIONS - 1) {
+                    calculateProfileAndShowResults();
+                } else {
+                    currentQuestionIndex++;
+                    renderApp();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentPage !== 'consultant') return;
+
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderApp();
+            } else if (currentQuestionIndex === 0) {
+                // Zurück zur Initial Input Seite
+                currentQuestionIndex = -1;
+                renderApp();
+            }
+        }
+        
+        function calculateProfileAndShowResults() {
+            // Profil-Scores initialisieren und aggregieren
+            userProfile = { speed: 0, control: 0, spin: 0, hardness: 0, stiffness: 0 };
+            userAnswers.forEach((optionIndex, qIndex) => {
+                if (optionIndex !== null) {
+                    const selectedValue = QUESTIONS[qIndex].options[optionIndex].value;
+                    for (const attr in selectedValue) {
+                        userProfile[attr] += selectedValue[attr];
+                    }
+                }
+            });
+
+            // Empfehlungen finden
+            const recommendedBlades = findBestMatch(MOCK_BLADES, ['speed', 'control', 'stiffness']);
+            const recommendedRubbers = findBestMatch(MOCK_RUBBERS, ['speed', 'control', 'spin', 'hardness']);
+
+            displayResults(recommendedBlades, recommendedRubbers);
+        }
+        
+        /**
+         * Sucht die besten Matches basierend auf der geringsten Abweichung zum berechneten Profil-Score.
+         */
+        function findBestMatch(catalog, attributes, topN = 3) {
+            let matches = [];
+
+            catalog.forEach(item => {
+                let currentDifference = 0;
+                attributes.forEach(attr => {
+                    let targetValue = item[attr]; 
+                    let userScore = userProfile[attr]; 
+                    let scalingFactor = 1.6; // Skalierung der Benutzerantworten
+                    // Die 5 als mittlerer Startwert für die Materialwerte (1-10)
+                    let idealTarget = 5 + (userScore / (TOTAL_QUESTIONS / 2) * scalingFactor); 
+                    
+                    idealTarget = Math.max(1, Math.min(10, idealTarget)); // Wert zwischen 1 und 10 halten
+
+                    const difference = targetValue - idealTarget;
+                    currentDifference += Math.abs(difference);
+                });
+                matches.push({ item, difference: currentDifference });
+            });
+            matches.sort((a, b) => a.difference - b.difference);
+            return matches.slice(0, topN).map(match => match.item);
+        }
+
+        /**
+         * Erstellt die HTML-Liste für die Empfehlung.
+         */
+        function createRecommendationList(items, type) {
+            let html = '';
+            items.forEach((item, index) => {
+                const rank = index + 1;
+                
+                const attributes = type === 'blade' 
+                    ? `Speed: ${item.speed}/10 | Kontrolle: ${item.control}/10 | Steifigkeit: ${item.stiffness}/10 | Material: ${item.material}`
+                    : `Speed: ${item.speed}/10 | Kontrolle: ${item.control}/10 | Spin: ${item.spin}/10 | Härte: ${item.hardness}/10 | Typ: ${item.rubber_type}`;
+                
+                const brandClass = getBrandClass(item.brand);
+                const brandIcon = getBrandIcon(item.brand);
+
+                html += `
+                    <div class="ranking-item bg-white p-4 rounded-lg border border-gray-200 shadow-md mb-4 hover:shadow-lg transition">
+                        <div class="ranking-number ranking-${rank}">${rank}</div>
+                        
+                        <div class="flex items-center mb-1">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full text-white ${brandClass} mr-2">${brandIcon} ${item.brand}</span>
+                            <h4 class="text-xl font-bold text-gray-800">${item.name}</h4>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 mb-2">${item.style}</p>
+                        <p class="text-xs font-semibold tt-blue-text">${attributes}</p>
+                        <p class="text-xs text-gray-500 mt-2">${item.desc}</p>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
+        // === GLOBAL BINDINGS UND START ===
+        window.toggleDetails = toggleDetails;
+        window.nextStep = nextStep;
+        window.prevStep = prevStep;
+        window.goToPage = goToPage;
+        window.initializeApp = initializeApp;
+        window.fetchRuleInterpretation = fetchRuleInterpretation;
+
+        window.onload = initializeApp;
+
+    </script>
+</body>
+</html>
